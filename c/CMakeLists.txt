@@ -6,6 +6,10 @@ project(libblake3
   LANGUAGES C ASM
 )
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+  set(BLAKE3_MASTER_PROJECT ON)
+endif()
+
 include(FeatureSummary)
 include(GNUInstallDirs)
 
@@ -157,33 +161,36 @@ else()
 endif()
 
 # cmake install support
-install(FILES blake3.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-install(TARGETS blake3 EXPORT blake3-targets)
-install(EXPORT blake3-targets
-  NAMESPACE BLAKE3::
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/blake3"
-)
-
-include(CMakePackageConfigHelpers)
-configure_package_config_file(blake3-config.cmake.in
-    "${CMAKE_CURRENT_BINARY_DIR}/blake3-config.cmake"
-
-    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/blake3"
-)
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/blake3-config-version.cmake"
-    VERSION ${libblake3_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
-install(FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/blake3-config.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/blake3-config-version.cmake"
+option(BLAKE3_INSTALL "Generate the install targets" ${BLAKE3_MASTER_PROJECT})
+if(BLAKE3_INSTALL)
+  install(FILES blake3.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+  install(TARGETS blake3 EXPORT blake3-targets)
+  install(EXPORT blake3-targets
+    NAMESPACE BLAKE3::
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/blake3"
-)
+  )
 
-configure_file(libblake3.pc.in libblake3.pc @ONLY)
-install(FILES "${CMAKE_BINARY_DIR}/libblake3.pc"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+  include(CMakePackageConfigHelpers)
+  configure_package_config_file(blake3-config.cmake.in
+      "${CMAKE_CURRENT_BINARY_DIR}/blake3-config.cmake"
+
+      INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/blake3"
+  )
+  write_basic_package_version_file(
+      "${CMAKE_CURRENT_BINARY_DIR}/blake3-config-version.cmake"
+      VERSION ${libblake3_VERSION}
+      COMPATIBILITY SameMajorVersion
+  )
+  install(FILES
+          "${CMAKE_CURRENT_BINARY_DIR}/blake3-config.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/blake3-config-version.cmake"
+      DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/blake3"
+  )
+
+  configure_file(libblake3.pc.in libblake3.pc @ONLY)
+  install(FILES "${CMAKE_BINARY_DIR}/libblake3.pc"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+endif()
 
 # print feature summary
 add_feature_info("AMD64 assembly" BLAKE3_SIMD_AMD64_ASM "The library uses hand written amd64 SIMD assembly.")
